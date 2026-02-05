@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chakkar - Black Hole Spaghettification</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at 50% 50%, #1a1a2e, #0f0f1e, #000);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #canvas-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        #blackhole {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 100, 50, 0.9), rgba(200, 50, 20, 0.8) 40%, #000 70%);
+            box-shadow: 
+                0 0 80px rgba(255, 150, 50, 0.8),
+                0 0 150px rgba(255, 80, 20, 0.6),
+                0 0 200px rgba(255, 200, 0, 0.4),
+                inset 0 0 60px rgba(0, 0, 0, 1),
+                inset -30px -30px 80px rgba(255, 100, 0, 0.3);
+            z-index: 50;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: phoenixPulse 2s ease-in-out infinite;
+        }
+        
+        #blackhole::before {
+            content: '';
+            position: absolute;
+            width: 160px;
+            height: 160px;
+            border: 3px solid transparent;
+            border-top-color: rgba(255, 150, 50, 0.6);
+            border-right-color: rgba(255, 100, 20, 0.4);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: accretionDisk 3s linear infinite;
+        }
+        
+        #blackhole::after {
+            content: '';
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 40%, rgba(255, 200, 100, 0.5), transparent);
+            top: 0;
+            left: 0;
+            animation: phoenixFlare 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes phoenixPulse {
+            0%, 100% {
+                box-shadow: 
+                    0 0 80px rgba(255, 150, 50, 0.8),
+                    0 0 150px rgba(255, 80, 20, 0.6),
+                    0 0 200px rgba(255, 200, 0, 0.4),
+                    inset 0 0 60px rgba(0, 0, 0, 1),
+                    inset -30px -30px 80px rgba(255, 100, 0, 0.3);
+            }
+            50% {
+                box-shadow: 
+                    0 0 120px rgba(255, 200, 50, 1),
+                    0 0 200px rgba(255, 100, 0, 0.8),
+                    0 0 280px rgba(255, 250, 100, 0.5),
+                    inset 0 0 80px rgba(0, 0, 0, 1),
+                    inset -40px -40px 100px rgba(255, 150, 20, 0.5);
+            }
+        }
+        
+        @keyframes accretionDisk {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        
+        @keyframes phoenixFlare {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.1); }
+        }
+        
+        .falling-img {
+            position: fixed;
+            z-index: 20;
+            transform-origin: center center;
+            overflow: hidden;
+        }
+        
+        .debris {
+            position: fixed;
+            pointer-events: none;
+            z-index: 19;
+        }
+        
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas-bg"></canvas>
+    <div id="blackhole"></div>
+    
+    <script>
+        const imagePaths = [
+            'newpic/IMG-20260130-WA0003.jpg.jpeg',
+            'newpic/IMG-20260116-WA0003.jpg.jpeg',
+            'newpic/IMG-20251205-WA0004.jpg.jpeg',
+            'newpic/IMG-20251104-WA0004.jpg.jpeg',
+            'newpic/IMG-20251104-WA0003.jpg.jpeg'
+        ];
+        
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+        const blackholeRadius = 60; // radius of black hole
+        const spaghettificationZone = 400; // distance at which spaghettification starts
+        
+        // Draw background stars
+        const canvas = document.getElementById('canvas-bg');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        function drawStars() {
+            ctx.fillStyle = 'white';
+            for (let i = 0; i < 200; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                const r = Math.random() * 1.5;
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        drawStars();
+        
+        let lastImageIndex = -1;
+        let activeImages = [];
+        
+        function getRandomImage() {
+            if (imagePaths.length === 1) return imagePaths[0];
+            let idx;
+            do { idx = Math.floor(Math.random() * imagePaths.length); } while (idx === lastImageIndex);
+            lastImageIndex = idx;
+            return imagePaths[idx];
+        }
+        
+        function spawnImage() {
+            const img = document.createElement('img');
+            const src = getRandomImage();
+            img.src = src;
+            img.className = 'falling-img';
+            
+            const size = Math.random() * 120 + 100; // 100-220px (larger)
+            img.style.width = size + 'px';
+            img.style.height = 'auto';
+            img.style.filter = 'saturate(1) grayscale(0%)';
+            img.baseSize = size;
+            
+            // spawn closer to black hole, within 600px radius
+            const angle = Math.random() * Math.PI * 2;
+            const distance = Math.random() * 600 + 300; // 300-900px from center
+            const x = centerX + Math.cos(angle) * distance;
+            const y = centerY + Math.sin(angle) * distance;
+            
+            img.style.left = x + 'px';
+            img.style.top = y + 'px';
+            img.startX = x;
+            img.startY = y;
+            img.spawnTime = Date.now();
+            img.duration = Math.random() * 2000 + 2000; // 2-4s
+            
+            document.body.appendChild(img);
+            activeImages.push(img);
+        }
+        
+        function animate() {
+            const now = Date.now();
+            
+            activeImages = activeImages.filter(img => {
+                if (!img.parentElement) return false;
+                
+                const elapsed = now - img.spawnTime;
+                const progress = Math.min(elapsed / img.duration, 1);
+                
+                // Calculate direction toward black hole
+                let x = img.startX;
+                let y = img.startY;
+                const dx = centerX - x;
+                const dy = centerY - y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                // Move toward black hole with accelerating speed (more realistic)
+                const speed = 3 + progress * 6; // accelerates from 3 to 9
+                const moveX = (dx / dist) * speed;
+                const moveY = (dy / dist) * speed;
+                
+                x += moveX;
+                y += moveY;
+                
+                // Distance from black hole center
+                const distFromBH = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
+                
+                // Spaghettification effect: extreme stretching, rotation, blur, and distortion
+                let scale = 1;
+                let scaleY = 1;
+                let sizeMultiplier = 1;
+                let rotation = 0;
+                let blurAmount = 0;
+                let brightness = 1;
+                let pixelate = 0;
+                
+                if (distFromBH < spaghettificationZone && distFromBH > blackholeRadius) {
+                    const squishFactor = 1 - (spaghettificationZone - distFromBH) / spaghettificationZone;
+                    
+                    // Extreme horizontal stretch (up to 20x - more realistic tidal force)
+                    scale = 1 + squishFactor * 20;
+                    
+                    // Extreme vertical compression (down to 0.05 - stronger crushing)
+                    scaleY = Math.max(1 - squishFactor * 0.95, 0.05);
+                    
+                    // Size shrinking as approach
+                    sizeMultiplier = Math.max(1 - squishFactor * 0.6, 0.3);
+                    
+                    // Add rotation that increases near event horizon (faster spin)
+                    rotation = squishFactor * 90;
+                    
+                    // Blur increases dramatically near black hole
+                    blurAmount = squishFactor * 30;
+                    
+                    // Darken and desaturate more aggressively
+                    brightness = Math.max(1 - squishFactor * 0.8, 0.15);
+                    
+                    // Pixelation effect near event horizon (visual breakdown)
+                    pixelate = Math.floor(squishFactor * 12);
+                    
+                    // Spawn debris pieces when spaghettified
+                    if (Math.random() < squishFactor * 0.15) {
+                        spawnDebris(x, y, squishFactor);
+                    }
+                }
+                
+                // Apply size change
+                img.style.width = (img.baseSize * sizeMultiplier) + 'px';
+                
+                // Grayscale and saturation based on distance to black hole
+                let grayscale = 0;
+                let saturate = 1;
+                if (distFromBH < spaghettificationZone) {
+                    const colorLoss = 1 - (distFromBH / spaghettificationZone);
+                    grayscale = Math.min(colorLoss * 100, 100);
+                    saturate = Math.max(1 - colorLoss, 0);
+                }
+                
+                img.style.left = x + 'px';
+                img.style.top = y + 'px';
+                img.style.transform = `translate(-50%, -50%) scale(${scale}, ${scaleY}) rotate(${rotation}deg)`;
+                img.style.filter = `saturate(${saturate}) grayscale(${grayscale}%) blur(${blurAmount}px) brightness(${brightness}) contrast(${1 + pixelate * 0.1})`;
+                img.style.opacity = Math.max(1 - progress * 0.5, 0.1);
+                
+                // Remove if past event horizon or fully faded
+                if (distFromBH < blackholeRadius || progress >= 1) {
+                    img.remove();
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            requestAnimationFrame(animate);
+        }
+        animate();
+        
+        function spawnDebris(x, y, intensity) {
+            const debris = document.createElement('div');
+            debris.className = 'debris';
+            const size = Math.random() * 15 + 5;
+            debris.style.width = size + 'px';
+            debris.style.height = size + 'px';
+            debris.style.background = `hsl(${Math.random() * 40}, ${60 + intensity * 40}%, ${50 - intensity * 30}%)`;
+            debris.style.borderRadius = '50%';
+            debris.style.left = (x + (Math.random() - 0.5) * 60) + 'px';
+            debris.style.top = (y + (Math.random() - 0.5) * 60) + 'px';
+            
+            document.body.appendChild(debris);
+            
+            // Animate debris falling into black hole
+            const debrisStartTime = Date.now();
+            const debrisDuration = 1500 + Math.random() * 1000;
+            
+            function animateDebris() {
+                const elapsed = Date.now() - debrisStartTime;
+                const progress = Math.min(elapsed / debrisDuration, 1);
+                
+                const dbx = parseFloat(debris.style.left);
+                const dby = parseFloat(debris.style.top);
+                let dx = centerX - dbx;
+                let dy = centerY - dby;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                if (dist > 5) {
+                    const moveX = (dx / dist) * 4;
+                    const moveY = (dy / dist) * 4;
+                    debris.style.left = (dbx + moveX) + 'px';
+                    debris.style.top = (dby + moveY) + 'px';
+                }
+                
+                debris.style.opacity = 1 - progress;
+                
+                if (progress < 1 && dist > blackholeRadius) {
+                    requestAnimationFrame(animateDebris);
+                } else {
+                    debris.remove();
+                }
+            }
+            
+            animateDebris();
+        }
+
+        setInterval(spawnImage, 500);
+        
+        // Spawn first image immediately
+        spawnImage();
+    </script>
+</body>
+</html>

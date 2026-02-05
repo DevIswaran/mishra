@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pics Rain</title>
+    <style>
+        body{background:linear-gradient(#87ceeb,#bfe9ff);overflow:hidden;margin:0;height:100vh}
+        #sky{position:relative;width:100%;height:100%;overflow:hidden}
+        .cloud{position:absolute;left:50%;top:8%;transform:translateX(-50%);font-size:48px;opacity:0.9}
+        .falling{position:fixed;will-change:transform,opacity;pointer-events:none;z-index:20}
+        @keyframes fallAndGrow{
+            0% { transform: translateY(-120px) scale(0.15); opacity: 0; }
+            20% { transform: translateY(0px) scale(0.45); opacity: 1; }
+            50% { transform: translateY(40vh) scale(0.9); opacity: 1; }
+            80% { transform: translateY(80vh) scale(1.25); opacity: 1; }
+            100% { transform: translateY(110vh) scale(1.5); opacity: 0; }
+        }
+        /* small caption */
+        .note{position:absolute;top:6%;left:6%;font-family:Arial,Helvetica,sans-serif;color:#023;font-weight:600}
+    </style>
+</head>
+
+<body>
+    <div id="sky">
+        <div class="cloud">☁️ ☁️ ☁️</div>
+    </div>
+
+    <script>
+        // Use images from the local `pics/` folder (auto-integrated)
+        const imagePaths = [
+            'pics/623869632_17926050453204701_4964100742692998600_n.webp',
+            'pics/625054284_17926758777204701_4759991200829829870_n.webp',
+            'pics/WhatsApp Image 2025-12-25 at 09.51.17.jpeg',
+            'pics/WhatsApp Image 2025-12-13 at 14.58.19.jpeg',
+            'pics/WhatsApp Image 2025-12-31 at 14.44.00.jpeg',
+            'pics/IMG-20250929-WA0005.jpg.jpeg',
+            'pics/625115906_17926761588204701_5586865594659924658_n.webp',
+            'pics/WhatsApp Image 2026-01-07 at 20.42.12.jpeg'
+        ];
+
+        // start immediately using discovered images
+        startRain();
+
+        function spawnImage(src){
+            const img=document.createElement('img');
+            img.src=src;
+            img.className='falling';
+            const size = Math.random()*60 + 40; // initial visual size
+            img.style.width = size+'px';
+            img.style.height = 'auto';
+            // random horizontal position
+            const x = Math.random()*(window.innerWidth-80)+20;
+            img.style.left = x + 'px';
+            img.style.top = '-140px';
+            const duration = Math.random()*3 + 4; // 4-7s
+            img.style.animation = `fallAndGrow ${duration}s linear forwards`;
+            // slightly stagger scale via transform origin
+            img.style.transformOrigin = '50% 0%';
+            document.getElementById('sky').appendChild(img);
+            // when animation ends, remove
+            setTimeout(()=>img.remove(), (duration+0.2)*1000);
+        }
+
+        function startRain(){
+            // if we have images, spawn periodically
+            if(imagePaths.length===0){
+                // show placeholder small images (colored dots)
+                return setInterval(()=>{
+                    // create a colored circle as fallback
+                    const d=document.createElement('div');
+                    d.className='falling';
+                    const s = Math.random()*24+24;
+                    d.style.width=s+'px'; d.style.height=s+'px'; d.style.borderRadius='50%';
+                    d.style.background = `hsl(${Math.random()*360} 80% 60%)`;
+                    const x = Math.random()*(window.innerWidth-80)+20;
+                    d.style.left=x+'px'; d.style.top='-120px';
+                    const duration = Math.random()*3 + 4;
+                    d.style.animation = `fallAndGrow ${duration}s linear forwards`;
+                    document.getElementById('sky').appendChild(d);
+                    setTimeout(()=>d.remove(), (duration+0.2)*1000);
+                }, 500);
+            }
+
+            // ensure we don't pick the same image twice in a row
+            let lastIndex = -1;
+            return setInterval(()=>{
+                if(imagePaths.length === 1){
+                    spawnImage(imagePaths[0]);
+                    return;
+                }
+                let idx;
+                // try until we get a different index (fast because list is small)
+                do { idx = Math.floor(Math.random()*imagePaths.length); } while (idx === lastIndex);
+                lastIndex = idx;
+                spawnImage(imagePaths[idx]);
+            }, 400);
+        }
+
+        // manual add removed — images come from `pics/` folder automatically
+    </script>
+</body>
+
+</html>

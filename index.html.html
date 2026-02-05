@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rainbow Candle with Flying Stars and Circles</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #000000;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        /* Flying Stars Background */
+        .stars-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: fly linear infinite;
+        }
+
+        @keyframes fly {
+            0% {
+                transform: translate(0, 0) scale(0);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(var(--fly-x), var(--fly-y)) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* Flying Circles with Text */
+        .flying-circle {
+            position: absolute;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Arial Black', sans-serif;
+            font-weight: bold;
+            color: white;
+            text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.9);
+            z-index: 5;
+            box-shadow: 0 0 50px rgba(255, 255, 255, 0.5);
+            transition: background-color 0.5s ease, transform 0.2s ease;
+            cursor: pointer;
+        }
+
+        .flying-circle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 70px rgba(255, 255, 255, 0.8);
+        }
+
+        /* Candle Container */
+        .candle-container {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Candle Body */
+        .candle {
+            width: 80px;
+            height: 200px;
+            background: linear-gradient(to right, #ff6b6b, #ff8787);
+            border-radius: 10px 10px 0 0;
+            position: relative;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+        }
+
+        .candle::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 20px;
+            background: #333;
+            border-radius: 5px;
+        }
+
+        /* Flame */
+        .flame {
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 60px;
+            background: linear-gradient(to top, orange, yellow, transparent);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: flicker 2s ease-in-out infinite;
+            filter: blur(2px);
+        }
+
+        .flame::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 15px;
+            height: 30px;
+            background: linear-gradient(to top, rgba(255, 200, 0, 0.8), rgba(255, 255, 100, 0.6));
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            filter: blur(1px);
+        }
+
+        @keyframes flicker {
+
+            0%,
+            100% {
+                transform: translateX(-50%) scaleY(1);
+            }
+
+            50% {
+                transform: translateX(-50%) scaleY(0.95) scaleX(1.05);
+            }
+        }
+
+        /* Rainbow Light Rays */
+        .rainbow-lights {
+            position: absolute;
+            top: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 300px;
+        }
+
+        .light-ray {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 150px;
+            transform-origin: bottom center;
+            animation: rotate 8s linear infinite;
+            opacity: 0.7;
+        }
+
+        .light-ray:nth-child(1) {
+            background: linear-gradient(to top, transparent, #ff0000);
+            animation-delay: 0s;
+        }
+
+        .light-ray:nth-child(2) {
+            background: linear-gradient(to top, transparent, #ff7f00);
+            animation-delay: -1s;
+        }
+
+        .light-ray:nth-child(3) {
+            background: linear-gradient(to top, transparent, #ffff00);
+            animation-delay: -2s;
+        }
+
+        .light-ray:nth-child(4) {
+            background: linear-gradient(to top, transparent, #00ff00);
+            animation-delay: -3s;
+        }
+
+        .light-ray:nth-child(5) {
+            background: linear-gradient(to top, transparent, #0000ff);
+            animation-delay: -4s;
+        }
+
+        .light-ray:nth-child(6) {
+            background: linear-gradient(to top, transparent, #4b0082);
+            animation-delay: -5s;
+        }
+
+        .light-ray:nth-child(7) {
+            background: linear-gradient(to top, transparent, #9400d3);
+            animation-delay: -6s;
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        /* Rainbow Glow */
+        .rainbow-glow {
+            position: absolute;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle,
+                    rgba(255, 0, 0, 0.2),
+                    rgba(255, 127, 0, 0.2),
+                    rgba(255, 255, 0, 0.2),
+                    rgba(0, 255, 0, 0.2),
+                    rgba(0, 0, 255, 0.2),
+                    rgba(75, 0, 130, 0.2),
+                    rgba(148, 0, 211, 0.2),
+                    transparent);
+            border-radius: 50%;
+            animation: pulse 3s ease-in-out infinite;
+            filter: blur(30px);
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: translateX(-50%) scale(1);
+                opacity: 0.6;
+            }
+
+            50% {
+                transform: translateX(-50%) scale(1.2);
+                opacity: 0.8;
+            }
+        }
+
+        /* Light Particles */
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        /* Custom cat cursor: hide default cursor and show emoji follow */
+        body.hide-native-cursor {
+            cursor: none;
+        }
+
+        #catCursor {
+            position: fixed;
+            left: 0;
+            top: 0;
+            transform: translate(-50%, -50%) scale(1.6);
+            font-size: 28px;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.08s linear;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+            will-change: transform, left, top;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 0;
+            }
+
+            100% {
+                transform: translateY(-300px) translateX(var(--drift-x));
+            }
+        }
+        /* Date triangles */
+        #dateContainer {
+            position: absolute;
+            left: 8%;
+            top: 18%;
+            transform: none;
+            z-index: 50;
+            pointer-events: none; /* children manage their own events */
+        }
+
+        .triangle {
+            width: 0;
+            height: 0;
+            position: absolute;
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: 'Arial Black', sans-serif;
+            user-select: none;
+        }
+
+        .big-triangle {
+            width: 240px;
+            height: 200px;
+            background: linear-gradient(135deg, #ff006e, #ff6b6b, #ffbe0b, #06ffa5, #00f5ff, #4cc9f0, #9d4edd);
+            clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+            transform-origin: center bottom;
+        }
+
+        .small-triangle {
+            border-left: 60px solid transparent;
+            border-right: 60px solid transparent;
+            border-top: 100px solid #4b4b4b;
+            width: 120px;
+            height: 100px;
+            transform-origin: center bottom;
+        }
+
+        .triangle .label {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, 0);
+            text-align: center;
+            pointer-events: none;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+        }
+
+        #yesTriangle { left: 0px; pointer-events: auto; }
+        #noTriangle { left: 160px; pointer-events: auto; }
+    </style>
+</head>
+
+<body>
+    <!-- Flying Stars Background -->
+    <div class="stars-container" id="starsContainer"></div>
+
+    <!-- Flying Circles with Text -->
+    <div class="flying-circle" id="circle1">Pics</div>
+    <div class="flying-circle" id="circle2">Chocolates</div>
+    <div class="flying-circle" id="circle3">Chakkar</div>
+
+    <!-- Candle with Rainbow Lights -->
+    <div class="candle-container">
+        <div class="rainbow-glow"></div>
+        <div class="rainbow-lights">
+            <div class="light-ray"></div>
+            <div class="light-ray"></div>
+            <div class="light-ray"></div>
+            <div class="light-ray"></div>
+            <div class="light-ray"></div>
+            <div class="light-ray"></div>
+            <div class="light-ray"></div>
+        </div>
+        <div class="flame"></div>
+        <div class="candle"></div>
+        <div id="particlesContainer"></div>
+    </div>
+
+    <!-- Date choice triangles -->
+    <div id="dateContainer">
+        <div id="yesTriangle" class="triangle big-triangle" style="top:0;">
+            <div class="label" style="font-size:18px; max-width:200px;">
+                You Will be my Date
+                <div style="font-size:36px; margin-top:6px;">YES</div>
+            </div>
+        </div>
+
+        <div id="noTriangle" class="triangle small-triangle" style="top:10px;">
+            <div class="label" style="font-size:14px;">No</div>
+        </div>
+    </div>
+
+    <script>
+        // Create flying stars - larger and in all directions
+        const starsContainer = document.getElementById('starsContainer');
+        for (let i = 0; i < 60; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            const size = Math.random() * 6 + 3; // 3-9px stars
+            star.style.width = size + 'px';
+            star.style.height = size + 'px';
+
+            // Random starting position
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+
+            // Fly in all directions
+            const angle = Math.random() * Math.PI * 2;
+            const distance = Math.random() * 1000 + 500;
+            const flyX = Math.cos(angle) * distance;
+            const flyY = Math.sin(angle) * distance;
+
+            star.style.setProperty('--fly-x', flyX + 'px');
+            star.style.setProperty('--fly-y', flyY + 'px');
+            star.style.animationDuration = (Math.random() * 10 + 5) + 's';
+            star.style.animationDelay = Math.random() * 5 + 's';
+            starsContainer.appendChild(star);
+        }
+
+        // Flying Circles with collision avoidance
+        const colorPalettes = [
+            '#ff006e', '#8338ec', '#3a86ff', '#fb5607', '#ffbe0b',
+            '#06ffa5', '#ff006e', '#9d4edd', '#00f5ff', '#ff6d00',
+            '#00bbf9', '#f72585', '#4cc9f0', '#7209b7', '#f77f00'
+        ];
+
+
+
+
+
+        class FlyingCircle {
+            constructor(element, text, startX, startY) {
+                this.element = element;
+                this.text = text;
+                this.x = startX;
+                this.y = startY;
+                this.vx = (Math.random() - 0.5) * 0.4; // slower initial horizontal speed
+                this.vy = (Math.random() - 0.5) * 0.4; // slower initial vertical speed
+                this.baseSize = 100;
+                this.size = this.baseSize;
+                this.targetSize = this.baseSize;
+                this.color = colorPalettes[Math.floor(Math.random() * colorPalettes.length)];
+                this.colorChangeTimer = 0;
+                this.sizeChangeTimer = 0;
+
+                // Weird motion variables
+                this.wobbleX = 0;
+                this.wobbleY = 0;
+                this.wobbleSpeed = Math.random() * 0.01 + 0.005; // slower wobble speed
+                this.wobbleAngle = Math.random() * Math.PI * 2;
+            }
+
+            updatePosition(allCircles) {
+                // Weird random motion with wobble
+                this.wobbleAngle += this.wobbleSpeed;
+                this.wobbleX = Math.sin(this.wobbleAngle) * 0.4; // smaller wobble
+                this.wobbleY = Math.cos(this.wobbleAngle * 0.7) * 0.4; // smaller wobble
+
+                // Add gentle random acceleration
+                this.vx += (Math.random() - 0.5) * 0.08 + this.wobbleX;
+                this.vy += (Math.random() - 0.5) * 0.08 + this.wobbleY;
+
+                // Apply damping so motion slows and clicking is easier
+                this.vx *= 0.95;
+                this.vy *= 0.95;
+
+                // Limit maximum speed
+                const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+                const maxSpeed = 0.6; // reduced max speed for slower motion
+                if (speed > maxSpeed) {
+                    this.vx = (this.vx / speed) * maxSpeed;
+                    this.vy = (this.vy / speed) * maxSpeed;
+                }
+
+                // Update position
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Bounce off walls
+                const margin = this.size / 2;
+                if (this.x < margin) {
+                    this.x = margin;
+                    this.vx = Math.abs(this.vx);
+                }
+                if (this.x > window.innerWidth - margin) {
+                    this.x = window.innerWidth - margin;
+                    this.vx = -Math.abs(this.vx);
+                }
+                if (this.y < margin) {
+                    this.y = margin;
+                    this.vy = Math.abs(this.vy);
+                }
+                if (this.y > window.innerHeight - margin) {
+                    this.y = window.innerHeight - margin;
+                    this.vy = -Math.abs(this.vy);
+                }
+
+                // Collision avoidance with other circles
+                allCircles.forEach(other => {
+                    if (other !== this) {
+                        const dx = other.x - this.x;
+                        const dy = other.y - this.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        const minDistance = (this.size + other.size) / 2 + 30;
+
+                        if (distance < minDistance && distance > 0) {
+                            // Push away from each other
+                            const angle = Math.atan2(dy, dx);
+                            const pushForce = (minDistance - distance) * 0.1;
+                            this.vx -= Math.cos(angle) * pushForce;
+                            this.vy -= Math.sin(angle) * pushForce;
+                        }
+                    }
+                });
+
+                // Random size changes
+                this.sizeChangeTimer++;
+                if (this.sizeChangeTimer > 60) {
+                    this.sizeChangeTimer = 0;
+                    this.targetSize = this.baseSize + (Math.random() - 0.5) * 80;
+                    this.targetSize = Math.max(60, Math.min(160, this.targetSize));
+                }
+                this.size += (this.targetSize - this.size) * 0.03;
+
+                // Random color changes
+                this.colorChangeTimer++;
+                if (this.colorChangeTimer > 100) {
+                    this.colorChangeTimer = 0;
+                    this.color = colorPalettes[Math.floor(Math.random() * colorPalettes.length)];
+                }
+
+                // Update element styles
+                this.element.style.left = (this.x - this.size / 2) + 'px';
+                this.element.style.top = (this.y - this.size / 2) + 'px';
+                this.element.style.width = this.size + 'px';
+                this.element.style.height = this.size + 'px';
+                // Use a smaller font ratio so text fits inside shapes
+                this.element.style.fontSize = (this.size / 6) + 'px';
+                this.element.style.backgroundColor = this.color;
+            }
+        }
+
+        // Initialize circles at different positions
+        const circle1 = new FlyingCircle(
+            document.getElementById('circle1'),
+            'Pics',
+            window.innerWidth * 0.2,
+            window.innerHeight * 0.3
+        );
+        const circle2 = new FlyingCircle(
+            document.getElementById('circle2'),
+            'Chocolates',
+            window.innerWidth * 0.7,
+            window.innerHeight * 0.3
+        );
+        const circle3 = new FlyingCircle(
+            document.getElementById('circle3'),
+            'Chakkar',
+            window.innerWidth * 0.65,
+            window.innerHeight * 0.8
+        );
+
+        const circles = [circle1, circle2, circle3];
+
+        // Add click event listeners for navigation
+        document.getElementById('circle1').addEventListener('click', function () {
+            window.location.href = 'pics.html';
+        });
+
+        document.getElementById('circle2').addEventListener('click', function () {
+            window.location.href = 'chocolates.html';
+        });
+
+        document.getElementById('circle3').addEventListener('click', function () {
+            window.location.href = 'chakkar.html';
+        });
+
+        // Create custom cat cursor and make it follow the mouse
+        const catCursor = document.createElement('div');
+        catCursor.id = 'catCursor';
+        catCursor.textContent = '🐱';
+        document.body.appendChild(catCursor);
+        // hide native cursor by adding a class
+        document.body.classList.add('hide-native-cursor');
+
+        document.addEventListener('mousemove', (e) => {
+            catCursor.style.left = e.clientX + 'px';
+            catCursor.style.top = e.clientY + 'px';
+            // slightly grow when near interactive elements
+            const el = document.elementFromPoint(e.clientX, e.clientY);
+            if (el && el.classList && el.classList.contains('flying-circle')) {
+                catCursor.style.transform = 'translate(-50%, -50%) scale(2)';
+            } else {
+                catCursor.style.transform = 'translate(-50%, -50%) scale(1.6)';
+            }
+        });
+
+        // Animation loop
+        function animate() {
+            circles.forEach(circle => circle.updatePosition(circles));
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // Light particles from candle
+        const particlesContainer = document.getElementById('particlesContainer');
+        const particleColors = ['#ff0000', '#ff7f00', '#ffff00', '#00ff00', '#0000ff', '#4b0082', '#9400d3'];
+
+        setInterval(() => {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            const size = Math.random() * 8 + 3;
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+            particle.style.backgroundColor = particleColors[Math.floor(Math.random() * particleColors.length)];
+            particle.style.left = (Math.random() * 60 + 10) + 'px';
+            particle.style.top = '-80px';
+            particle.style.setProperty('--drift-x', (Math.random() * 100 - 50) + 'px');
+            particle.style.animationDuration = (Math.random() * 2 + 3) + 's';
+            particlesContainer.appendChild(particle);
+
+            setTimeout(() => {
+                particle.remove();
+            }, 5000);
+        }, 200);
+
+        // Date triangles behavior: YES is clickable; NO evades cursor and shrinks over time
+        (function () {
+            const yes = document.getElementById('yesTriangle');
+            const no = document.getElementById('noTriangle');
+
+            // initialise positions as fixed so we can move them easily
+            function setInitial() {
+                const leftX = Math.max(20, Math.floor(window.innerWidth * 0.08));
+                const topY = Math.floor(window.innerHeight * 0.18);
+
+                yes.style.position = 'fixed';
+                yes.style.left = (leftX) + 'px';
+                yes.style.top = (topY) + 'px';
+
+                no.style.position = 'fixed';
+                no.style.left = (leftX + 160) + 'px';
+                no.style.top = (topY + 10) + 'px';
+
+                no._x = leftX + 160;
+                no._y = topY + 10;
+                no._scale = 1;
+            }
+
+            setInitial();
+            window.addEventListener('resize', setInitial);
+
+            // YES click
+            yes.style.cursor = 'pointer';
+            yes.addEventListener('click', () => {
+                alert('You clicked YES!');
+            });
+
+            // Ensure NO can't be clicked normally
+            no.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+
+            // Shrink NO over time so it becomes unclickable
+            const shrinkInterval = 350; // ms
+            const shrinkFactor = 0.98;
+            const minScale = 0.35;
+            const shrinkTimer = setInterval(() => {
+                no._scale *= shrinkFactor;
+                no.style.transform = `translate(-50%, -20%) scale(${no._scale})`;
+                if (no._scale <= minScale) {
+                    no.style.pointerEvents = 'none';
+                    clearInterval(shrinkTimer);
+                }
+            }, shrinkInterval);
+
+            // Evade cursor: on mousemove, if cursor is near NO, push it away
+            let mouseX = -9999, mouseY = -9999;
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+
+            function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+            function fleeStep() {
+                const rect = no.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const dx = centerX - mouseX;
+                const dy = centerY - mouseY;
+                const dist = Math.sqrt(dx * dx + dy * dy) || 0.001;
+
+                const safeDist = 180;
+                if (dist < safeDist) {
+                    // move away proportional to closeness, with jitter
+                    const push = (safeDist - dist) * 0.9 + 6;
+                    no._x += (dx / dist) * push + (Math.random() - 0.5) * 8;
+                    no._y += (dy / dist) * push + (Math.random() - 0.5) * 8;
+                }
+
+                // gradually drift a bit to avoid getting stuck
+                no._x += (Math.random() - 0.5) * 0.6;
+                no._y += (Math.random() - 0.5) * 0.6;
+
+                // keep within viewport bounds
+                const margin = 20;
+                no._x = clamp(no._x, margin, window.innerWidth - rect.width - margin);
+                no._y = clamp(no._y, margin, window.innerHeight - rect.height - margin);
+
+                no.style.left = no._x + 'px';
+                no.style.top = no._y + 'px';
+
+                requestAnimationFrame(fleeStep);
+            }
+
+            requestAnimationFrame(fleeStep);
+        })();
+    </script>
+</body>
+
+</html>

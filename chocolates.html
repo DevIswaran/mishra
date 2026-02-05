@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rabbit Chasing KitKat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+
+        #canvas {
+            display: block;
+            background: linear-gradient(to bottom, #87CEEB 0%, #E0F6FF 50%, #90EE90 100%);
+        }
+
+        .text-overlay {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            text-shadow: 2px 2px 4px rgba(255,255,255,0.8);
+            font-family: 'Comic Sans MS', cursive;
+        }
+    </style>
+</head>
+<body>
+    <div class="text-overlay">Have a break, have a ....... 🐰🍫</div>
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Load the chocolate image
+        const chocolateImg = new Image();
+        chocolateImg.src = 'chocolates.jpeg';
+        let imageLoaded = false;
+        
+        chocolateImg.onload = function() {
+            imageLoaded = true;
+            console.log('Image loaded successfully!');
+        };
+        
+        chocolateImg.onerror = function() {
+            console.error('Failed to load image');
+        };
+
+        // Animation variables
+        let animationFrame = 0;
+        let rabbitX = -150;  // Start off-screen left
+        let rabbitY = canvas.height - 200;
+        let chocolateX = 100;  // Chocolate starts ahead on the left
+        let chocolateY = canvas.height - 250;
+        let rabbitJumping = false;
+        let jumpHeight = 0;
+        let rabbitDirection = 1;
+        let chocolateBounce = 0;
+        let chocolateSpeed = 4.8;  // Chocolate is faster - always escapes!
+        let rabbitSpeed = 4.5;  // Rabbit is slightly slower - will never catch it!
+
+        // Grass particles
+        const grassBlades = [];
+        for (let i = 0; i < 100; i++) {
+            grassBlades.push({
+                x: Math.random() * canvas.width,
+                y: canvas.height - Math.random() * 100,
+                height: 20 + Math.random() * 30,
+                sway: Math.random() * Math.PI * 2,
+                swaySpeed: 0.02 + Math.random() * 0.03
+            });
+        }
+
+        // Mountain drawing function
+        function drawMountains() {
+            // Back mountains
+            ctx.fillStyle = '#8B7355';
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height - 150);
+            ctx.lineTo(200, canvas.height - 400);
+            ctx.lineTo(400, canvas.height - 150);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(300, canvas.height - 150);
+            ctx.lineTo(500, canvas.height - 450);
+            ctx.lineTo(700, canvas.height - 150);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(600, canvas.height - 150);
+            ctx.lineTo(800, canvas.height - 380);
+            ctx.lineTo(1000, canvas.height - 150);
+            ctx.fill();
+
+            // Snow caps
+            ctx.fillStyle = '#FFFFFF';
+            ctx.beginPath();
+            ctx.moveTo(480, canvas.height - 450);
+            ctx.lineTo(500, canvas.height - 450);
+            ctx.lineTo(520, canvas.height - 450);
+            ctx.lineTo(500, canvas.height - 420);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(780, canvas.height - 380);
+            ctx.lineTo(800, canvas.height - 380);
+            ctx.lineTo(820, canvas.height - 380);
+            ctx.lineTo(800, canvas.height - 355);
+            ctx.fill();
+        }
+
+        // Ground drawing
+        function drawGround() {
+            ctx.fillStyle = '#228B22';
+            ctx.fillRect(0, canvas.height - 150, canvas.width, 150);
+
+            // Solar grass (glowing effect)
+            grassBlades.forEach(blade => {
+                blade.sway += blade.swaySpeed;
+                const swayOffset = Math.sin(blade.sway) * 5;
+                
+                const gradient = ctx.createLinearGradient(
+                    blade.x, blade.y, 
+                    blade.x, blade.y - blade.height
+                );
+                gradient.addColorStop(0, '#2E7D32');
+                gradient.addColorStop(0.5, '#66BB6A');
+                gradient.addColorStop(1, '#A5D6A7');
+                
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(blade.x, blade.y);
+                ctx.quadraticCurveTo(
+                    blade.x + swayOffset, 
+                    blade.y - blade.height / 2,
+                    blade.x + swayOffset * 2, 
+                    blade.y - blade.height
+                );
+                ctx.stroke();
+
+                // Glow effect
+                if (Math.random() > 0.95) {
+                    ctx.fillStyle = 'rgba(255, 255, 150, 0.3)';
+                    ctx.beginPath();
+                    ctx.arc(blade.x + swayOffset * 2, blade.y - blade.height, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+        }
+
+        // Draw animated rabbit (cool style like in the image)
+        function drawRabbit(x, y, jump) {
+            const baseY = y - jump;
+            
+            // Shadow
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.beginPath();
+            ctx.ellipse(x, y + 30, 35, 10, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Body
+            ctx.fillStyle = '#FFA500';
+            ctx.beginPath();
+            ctx.ellipse(x, baseY, 40, 50, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Head
+            ctx.beginPath();
+            ctx.arc(x, baseY - 50, 35, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Ears
+            ctx.beginPath();
+            ctx.ellipse(x - 15, baseY - 75, 8, 25, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(x + 15, baseY - 75, 8, 25, 0.3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Inner ears (pink)
+            ctx.fillStyle = '#FFB6C1';
+            ctx.beginPath();
+            ctx.ellipse(x - 15, baseY - 75, 4, 15, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(x + 15, baseY - 75, 4, 15, 0.3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Sunglasses
+            ctx.fillStyle = '#000';
+            ctx.fillRect(x - 25, baseY - 55, 18, 8);
+            ctx.fillRect(x + 7, baseY - 55, 18, 8);
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(x - 7, baseY - 51);
+            ctx.lineTo(x + 7, baseY - 51);
+            ctx.stroke();
+
+            // Nose
+            ctx.fillStyle = '#FFB6C1';
+            ctx.beginPath();
+            ctx.moveTo(x, baseY - 45);
+            ctx.lineTo(x - 4, baseY - 40);
+            ctx.lineTo(x + 4, baseY - 40);
+            ctx.fill();
+
+            // Mouth
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(x - 5, baseY - 38, 5, 0.2, Math.PI - 0.2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(x + 5, baseY - 38, 5, 0.2, Math.PI - 0.2);
+            ctx.stroke();
+
+            // Arms with thumbs up gesture
+            ctx.fillStyle = '#FFA500';
+            
+            // Left arm
+            ctx.beginPath();
+            ctx.ellipse(x - 45, baseY - 10, 12, 25, -0.5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Thumbs up
+            ctx.fillStyle = '#FFA500';
+            ctx.beginPath();
+            ctx.roundRect(x - 50, baseY - 30, 8, 15, 3);
+            ctx.fill();
+            
+            // Thumb
+            ctx.beginPath();
+            ctx.arc(x - 55, baseY - 25, 5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Right arm
+            ctx.beginPath();
+            ctx.ellipse(x + 45, baseY - 10, 12, 25, 0.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Legs
+            ctx.beginPath();
+            ctx.ellipse(x - 20, baseY + 35, 15, 30, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(x + 20, baseY + 35, 15, 30, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Feet
+            ctx.beginPath();
+            ctx.ellipse(x - 20, baseY + 55, 18, 12, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(x + 20, baseY + 55, 18, 12, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Tail
+            ctx.fillStyle = '#FFF';
+            ctx.beginPath();
+            ctx.arc(x - 40, baseY + 20, 12, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Draw KitKat chocolate image
+        function drawChocolate(x, y, bounce) {
+            if (!imageLoaded) return;
+            
+            const baseY = y + Math.sin(bounce) * 10;
+            
+            // Shadow
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.beginPath();
+            ctx.ellipse(x, y + 100, 40, 12, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw the actual chocolate image
+            ctx.save();
+            
+            // Add slight rotation for dynamic effect
+            ctx.translate(x, baseY);
+            ctx.rotate(Math.sin(bounce) * 0.1);
+            
+            // Draw image centered
+            const imgWidth = 120;
+            const imgHeight = 150;
+            ctx.drawImage(chocolateImg, -imgWidth/2, -imgHeight/2, imgWidth, imgHeight);
+            
+            // Add glow effect around the chocolate
+            ctx.shadowColor = 'rgba(230, 57, 70, 0.5)';
+            ctx.shadowBlur = 20;
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(-imgWidth/2, -imgHeight/2, imgWidth, imgHeight);
+            
+            ctx.restore();
+        }
+
+        // Animation loop
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw scene
+            drawMountains();
+            drawGround();
+            
+            // Chocolate movement (getting away to the right)
+            chocolateX += chocolateSpeed;
+            chocolateBounce += 0.1;
+            
+            // If chocolate goes off screen RIGHT, reset BOTH to LEFT for infinite chase
+            if (chocolateX > canvas.width + 150) {
+                chocolateX = 100;  // Reset chocolate to left side
+                chocolateY = canvas.height - 250 - Math.random() * 50;
+                rabbitX = -150; // Reset rabbit to off-screen left
+            }
+
+            // Rabbit chasing movement - runs to the RIGHT chasing chocolate
+            if (chocolateX > rabbitX + 50) {
+                rabbitX += rabbitSpeed;  // Rabbit runs fast but chocolate is faster!
+                rabbitDirection = 1;
+                
+                // More frequent jumping - rabbit is trying hard!
+                if (animationFrame % 20 === 0) {
+                    rabbitJumping = true;
+                }
+            }
+            
+            // Keep minimum distance so rabbit never catches the chocolate
+            if (chocolateX - rabbitX < 120 && chocolateX - rabbitX > 0) {
+                chocolateX = rabbitX + 120; // Maintain gap - chocolate always stays ahead!
+            }
+
+            if (rabbitJumping) {
+                jumpHeight += 3;  // Faster jump
+                if (jumpHeight > 40) {  // Higher jump
+                    rabbitJumping = false;
+                    jumpHeight = 0;
+                }
+            }
+
+            // Draw rabbit reaching for chocolate
+            ctx.save();
+            if (rabbitDirection === 1) {
+                drawRabbit(rabbitX, rabbitY, jumpHeight);
+            } else {
+                ctx.scale(-1, 1);
+                drawRabbit(-rabbitX, rabbitY, jumpHeight);
+            }
+            ctx.restore();
+
+            // Draw chocolate
+            drawChocolate(chocolateX, chocolateY, chocolateBounce);
+
+            // Draw reaching effect lines
+            if (Math.abs(chocolateX - rabbitX) < 150 && Math.abs(chocolateX - rabbitX) > 80) {
+                ctx.strokeStyle = 'rgba(255, 200, 0, 0.3)';
+                ctx.lineWidth = 3;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.moveTo(rabbitX + 40, rabbitY - jumpHeight - 10);
+                ctx.lineTo(chocolateX - 30, chocolateY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            animationFrame++;
+            requestAnimationFrame(animate);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            rabbitY = canvas.height - 200;
+            chocolateY = canvas.height - 250;
+        });
+
+        // Start animation
+        animate();
+    </script>
+</body>
+</html>
