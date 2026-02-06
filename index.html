@@ -1,4 +1,3 @@
-// 5feb2026
 <!DOCTYPE html>
 <html lang="en">
 
@@ -84,6 +83,12 @@
         .candle-container {
             position: relative;
             z-index: 10;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .candle-container:hover {
+            transform: scale(1.1);
         }
 
         /* Candle Body */
@@ -381,7 +386,7 @@
     <div id="dateContainer">
         <div id="yesTriangle" class="triangle big-triangle" style="top:0;">
             <div class="label" style="font-size:18px; max-width:200px;">
-                You Will be my Date?
+                You Will be my Date
                 <div style="font-size:36px; margin-top:6px;">YES</div>
             </div>
         </div>
@@ -651,10 +656,16 @@
             setInitial();
             window.addEventListener('resize', setInitial);
 
-            // YES click
+        // YES click
             yes.style.cursor = 'pointer';
             yes.addEventListener('click', () => {
-                alert('You clicked YES!');
+                window.location.href = 'dragon.html';
+            });
+
+            // Add click event to candle container
+            const candleContainer = document.querySelector('.candle-container');
+            candleContainer.addEventListener('click', () => {
+                window.location.href = 'dragon.html';
             });
 
             // Ensure NO can't be clicked normally

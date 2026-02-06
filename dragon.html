@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dragon - Love Story</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #000000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 80px 60px;
+            max-width: 950px;
+            width: 90%;
+            margin: 0 auto;
+            clip-path: polygon(20% 0%, 100% 0%, 80% 100%, 0% 100%);
+            box-shadow: 0 0 30px #ffeb3b, 0 0 60px #ffd700, 0 0 90px #ff6600, inset 0 0 40px rgba(255, 235, 59, 0.2);
+            border: 3px solid #ffeb3b;
+            position: relative;
+            z-index: 100;
+        }
+
+        h1 {
+            color: white;
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 1s ease-in;
+        }
+
+        .dragon-pic {
+            width: 250px;
+            height: 250px;
+            margin: 20px auto;
+            display: block;
+            animation: bounce 2s ease-in-out infinite;
+            filter: brightness(0) drop-shadow(0 0 30px #ffeb3b) drop-shadow(0 0 60px #ffd700);
+            transition: transform 0.05s ease-out;
+        }
+
+        .music-info {
+            color: white;
+            font-size: 1.2em;
+            margin: 20px auto;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        audio {
+            width: 95%;
+            margin: 0;
+            display: block;
+            outline: none;
+            color: #ffeb3b;
+            accent-color: #ffeb3b;
+            background: transparent;
+        }
+        
+        /* Style audio controls for WebKit browsers */
+        audio::-webkit-media-controls-panel {
+            background-color: transparent;
+            border-radius: 0;
+        }
+        
+        audio::-webkit-media-controls-enclosure {
+            background-color: transparent;
+        }
+        
+        audio::-webkit-media-controls-mute-button,
+        audio::-webkit-media-controls-play-button,
+        audio::-webkit-media-controls-timeline,
+        audio::-webkit-media-controls-current-time-display,
+        audio::-webkit-media-controls-time-remaining-display,
+        audio::-webkit-media-controls-volume-slider {
+            border-radius: 0 !important;
+        }
+        
+        audio::-webkit-media-controls-timeline {
+            background-color: transparent;
+        }
+        
+        audio::-webkit-media-controls-slider-thumb {
+            background-color: #ffeb3b;
+            border-radius: 0 !important;
+        }
+        
+        /* Firefox audio styling */
+        audio {
+            accent-color: #ffeb3b;
+        }
+
+        .audio-rhombus {
+            width: 600px;
+            height: 180px;
+            margin: 30px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 3px solid #ffeb3b;
+            clip-path: polygon(20% 0%, 100% 0%, 80% 100%, 0% 100%);
+            box-shadow: 0 0 30px #ffeb3b, 0 0 60px #ffd700, 0 0 90px #ff6600, inset 0 0 40px rgba(255, 235, 59, 0.2);
+        }
+
+        .audio-rhombus audio {
+            margin: 0;
+            width: 90%;
+        }
+
+        .back-btn {
+            margin-top: 30px;
+            padding: 12px 30px;
+            background: rgba(255, 235, 59, 0.1);
+            border: 2px solid #ffeb3b;
+            color: #ffeb3b;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 0 15px #ffeb3b, 0 0 30px #ffd700, inset 0 0 20px rgba(255, 235, 59, 0.1);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 235, 59, 0.2);
+            transform: scale(1.1);
+            box-shadow: 0 0 25px #ffeb3b, 0 0 50px #ffd700, 0 0 70px #ff6600, inset 0 0 30px rgba(255, 235, 59, 0.3);
+            text-shadow: 0 0 10px #ffeb3b, 0 0 20px #ffd700;
+        }
+        
+        .back-btn:active {
+            transform: scale(0.95);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        /* Stars and Moon */
+        .star {
+            position: fixed;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 5;
+            box-shadow: 0 0 10px white, 0 0 20px rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 255, 255, 0.4);
+        }
+
+        .falling-star {
+            position: fixed;
+            background: #ffeb3b;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10;
+            animation: fall linear;
+            box-shadow: 0 0 8px #ffeb3b, 0 0 15px #ffd700;
+        }
+
+        .moon {
+            position: fixed;
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 50%;
+            top: 5%;
+            right: 5%;
+            animation: moonTwinkle 4s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 5;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+        }
+
+        @keyframes twinkle {
+            0%, 100% { 
+                opacity: 0.3; 
+                transform: scale(0.8);
+            }
+            50% { 
+                opacity: 1; 
+                transform: scale(1.2);
+            }
+        }
+
+        @keyframes moonTwinkle {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh);
+                opacity: 0;
+            }
+        }
+
+        .message {
+            color: white;
+            font-size: 1.1em;
+            margin: 20px auto;
+            text-align: center;
+            line-height: 1.6;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Stars and Moon Background -->
+    <div class="moon"></div>
+    <div id="starsContainer"></div>
+    
+    <div class="container">
+        <h1>---- 🐉   ME AND MY DRAGON  🐉</h1>
+        <img src="darognPic.svg" alt="Dragon" class="dragon-pic">
+        
+        <div class="music-info">
+            CONFESS YOUR LOVE
+        </div>
+
+        <div class="audio-rhombus">
+            <audio controls autoplay>
+                <source src="yourLove.mp4" type="audio/mp4">
+                Your browser does not support the audio element.
+            </audio>
+        </div>
+    </div>
+
+    <script>
+        // Create twinkling stars in background
+        function createBackgroundStars() {
+            const container = document.getElementById('starsContainer');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                const size = Math.random() * 6 + 2; // Larger stars: 2-8px
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 80 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.animationDuration = (Math.random() * 2 + 2) + 's'; // Varied twinkling speed
+                container.appendChild(star);
+            }
+        }
+
+        // Create falling stars
+        function createFallingStar() {
+            const star = document.createElement('div');
+            star.className = 'falling-star';
+            const size = Math.random() * 4 + 2;
+            star.style.width = size + 'px';
+            star.style.height = size + 'px';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = '-20px';
+            
+            const duration = Math.random() * 3 + 4;
+            star.style.animationDuration = duration + 's';
+            
+            document.body.appendChild(star);
+            
+            // Remove after animation completes
+            setTimeout(() => star.remove(), duration * 1000);
+        }
+
+        // Dragon jumping logic
+        let isJumping = false;
+        function makeDragonJump() {
+            const dragon = document.querySelector('.dragon-pic');
+            if (!isJumping) {
+                isJumping = true;
+                dragon.style.animation = 'none';
+                setTimeout(() => {
+                    dragon.style.animation = '';
+                    isJumping = false;
+                }, 500);
+                
+                dragon.style.transform = 'translateY(-100px) scale(1)';
+                setTimeout(() => {
+                    dragon.style.transform = 'translateY(0) scale(1)';
+                }, 500);
+            }
+        }
+
+        // Check for collisions between falling stars and dragon
+        function checkCollisions() {
+            const dragon = document.querySelector('.dragon-pic');
+            const dragonRect = dragon.getBoundingClientRect();
+            const fallingStars = document.querySelectorAll('.falling-star');
+            
+            fallingStars.forEach(star => {
+                const starRect = star.getBoundingClientRect();
+                
+                // Check if star is close to dragon
+                if (
+                    starRect.left < dragonRect.right &&
+                    starRect.right > dragonRect.left &&
+                    starRect.top < dragonRect.bottom &&
+                    starRect.bottom > dragonRect.top
+                ) {
+                    makeDragonJump();
+                    star.style.opacity = '0';
+                }
+            });
+        }
+
+        // Initialize background
+        createBackgroundStars();
+        
+        // Create falling stars at intervals
+        setInterval(createFallingStar, 1500);
+        
+        // Check collisions continuously
+        setInterval(checkCollisions, 50);
+        
+        let audioContext, analyser, dataArray;
+        const dragonPic = document.querySelector('.dragon-pic');
+        const audio = document.querySelector('audio');
+        
+        // Initialize audio analysis
+        function initAudioAnalysis() {
+            if (audioContext) return;
+            
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const source = audioContext.createMediaElementAudioSource(audio);
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 256;
+            source.connect(analyser);
+            analyser.connect(audioContext.destination);
+            
+            dataArray = new Uint8Array(analyser.frequencyBinCount);
+        }
+        
+        // Sync dragon movement with music
+        function animateDragon() {
+            if (!analyser) return;
+            
+            analyser.getByteFrequencyData(dataArray);
+            
+            // Analyze different frequency bands
+            const lowFreq = dataArray.slice(0, 10).reduce((a, b) => a + b) / 10;
+            const midFreq = dataArray.slice(10, 50).reduce((a, b) => a + b) / 40;
+            const highFreq = dataArray.slice(50, 100).reduce((a, b) => a + b) / 50;
+            
+            // Normalize values (0-1)
+            const low = lowFreq / 255;
+            const mid = midFreq / 255;
+            const high = highFreq / 255;
+            
+            // Calculate movement based on frequencies
+            const moveX = (mid - 0.5) * 60; // Left-right motion from mid frequencies
+            const moveY = (low - 0.5) * 60; // Up-down motion from low frequencies
+            const scale = 1 + high * 0.3; // Scale based on high frequencies
+            
+            // Apply transforms
+            dragonPic.style.transform = `translate(${moveX}px, ${moveY}px) scale(${scale})`;
+            
+            requestAnimationFrame(animateDragon);
+        }
+        
+        // Start animation when audio plays
+        audio.addEventListener('play', () => {
+            initAudioAnalysis();
+            animateDragon();
+        });
+        
+        // Resume audio context if needed
+        document.addEventListener('click', () => {
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        });
+        
+        // Auto-play the music when page loads
+        window.addEventListener('load', function() {
+            const audio = document.querySelector('audio');
+            if (audio) {
+                audio.play().catch(function(error) {
+                    console.log('Autoplay prevented:', error);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
