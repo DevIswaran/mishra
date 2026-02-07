@@ -15,7 +15,7 @@
         body {
             width: 100vw;
             height: 100vh;
-            background: radial-gradient(circle at 50% 50%, #1a1a2e, #0f0f1e, #000);
+            background: #000;
             overflow: hidden;
             display: flex;
             justify-content: center;
@@ -31,109 +31,75 @@
             z-index: 1;
         }
 
+        #blackhole-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            z-index: 50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
         #blackhole {
             position: absolute;
-            width: 120px;
-            height: 120px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
-            background: radial-gradient(circle at 30% 30%, rgba(255, 100, 50, 0.9), rgba(200, 50, 20, 0.8) 40%, #000 70%);
+            background: #000;
+            box-shadow: 0 0 20px 2px rgba(255, 255, 255, 0.1);
+            /* Subtle event horizon glow */
+            z-index: 52;
+        }
+
+        /* Accretion Disk */
+        #accretion-disk {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: radial-gradient(transparent 30%, rgba(255, 200, 150, 0.2) 40%, rgba(255, 100, 50, 0.6) 50%, rgba(255, 255, 255, 0.8) 55%, rgba(100, 150, 255, 0.4) 70%, transparent 80%);
             box-shadow:
-                0 0 80px rgba(255, 150, 50, 0.8),
-                0 0 150px rgba(255, 80, 20, 0.6),
-                0 0 200px rgba(255, 200, 0, 0.4),
-                inset 0 0 60px rgba(0, 0, 0, 1),
-                inset -30px -30px 80px rgba(255, 100, 0, 0.3);
-            z-index: 50;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            animation: phoenixPulse 2s ease-in-out infinite;
+                0 0 30px rgba(255, 150, 50, 0.3),
+                inset 0 0 20px rgba(255, 255, 255, 0.2);
+            z-index: 51;
+            transform: scaleY(0.4);
+            animation: spinDisk 10s linear infinite;
+            filter: blur(1px);
         }
 
-        #blackhole::before {
-            content: '';
+        /* Photon Ring (The thin bright ring around the shadow) */
+        #photon-ring {
             position: absolute;
-            width: 160px;
-            height: 160px;
-            border: 3px solid transparent;
-            border-top-color: rgba(255, 150, 50, 0.6);
-            border-right-color: rgba(255, 100, 20, 0.4);
+            width: 86px;
+            height: 86px;
             border-radius: 50%;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            animation: accretionDisk 3s linear infinite;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            z-index: 53;
+            opacity: 0.7;
         }
 
-        #blackhole::after {
-            content: '';
-            position: absolute;
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 40% 40%, rgba(255, 200, 100, 0.5), transparent);
-            top: 0;
-            left: 0;
-            animation: phoenixFlare 1.5s ease-in-out infinite;
-        }
-
-        @keyframes phoenixPulse {
-
-            0%,
-            100% {
-                box-shadow:
-                    0 0 80px rgba(255, 150, 50, 0.8),
-                    0 0 150px rgba(255, 80, 20, 0.6),
-                    0 0 200px rgba(255, 200, 0, 0.4),
-                    inset 0 0 60px rgba(0, 0, 0, 1),
-                    inset -30px -30px 80px rgba(255, 100, 0, 0.3);
-            }
-
-            50% {
-                box-shadow:
-                    0 0 120px rgba(255, 200, 50, 1),
-                    0 0 200px rgba(255, 100, 0, 0.8),
-                    0 0 280px rgba(255, 250, 100, 0.5),
-                    inset 0 0 80px rgba(0, 0, 0, 1),
-                    inset -40px -40px 100px rgba(255, 150, 20, 0.5);
-            }
-        }
-
-        @keyframes accretionDisk {
+        @keyframes spinDisk {
             0% {
-                transform: translate(-50%, -50%) rotate(0deg);
+                transform: rotate(0deg) scaleY(0.4);
             }
 
             100% {
-                transform: translate(-50%, -50%) rotate(360deg);
-            }
-        }
-
-        @keyframes phoenixFlare {
-
-            0%,
-            100% {
-                opacity: 0.3;
-                transform: scale(1);
-            }
-
-            50% {
-                opacity: 0.8;
-                transform: scale(1.1);
+                transform: rotate(360deg) scaleY(0.4);
             }
         }
 
         .falling-img {
             position: fixed;
-            z-index: 20;
+            z-index: 40;
+            /* Behind blackhole if strictly simpler, but we want scaling/disappearing logic to handle visibility */
             transform-origin: center center;
             overflow: hidden;
-        }
-
-        .debris {
-            position: fixed;
-            pointer-events: none;
-            z-index: 19;
+            will-change: transform, opacity, filter;
         }
 
         .star {
@@ -147,7 +113,11 @@
 
 <body>
     <canvas id="canvas-bg"></canvas>
-    <div id="blackhole"></div>
+    <div id="blackhole-container">
+        <div id="accretion-disk"></div>
+        <div id="blackhole"></div>
+        <div id="photon-ring"></div>
+    </div>
 
     <script>
         const imagePaths = [
@@ -161,8 +131,9 @@
 
         const centerX = window.innerWidth / 2;
         const centerY = window.innerHeight / 2;
-        const blackholeRadius = 60; // radius of black hole
-        const spaghettificationZone = 400; // distance at which spaghettification starts
+        const eventHorizonRadius = 40; // The actual black hole void (80px diameter / 2)
+        const accretionDiskRadius = 90; // Visible disk
+        const gravityWell = 500; // Gravity starts pulling here
 
         // Draw background stars
         const canvas = document.getElementById('canvas-bg');
@@ -172,26 +143,57 @@
 
         function drawStars() {
             ctx.fillStyle = 'white';
-            for (let i = 0; i < 200; i++) {
+            for (let i = 0; i < 300; i++) {
                 const x = Math.random() * canvas.width;
                 const y = Math.random() * canvas.height;
-                const r = Math.random() * 1.5;
+                // Avoid drawing stars inside the black hole area
+                const dx = x - centerX;
+                const dy = y - centerY;
+                if (Math.sqrt(dx * dx + dy * dy) < 100) continue;
+
+                const r = Math.random() * 1.2;
+                ctx.globalAlpha = Math.random() * 0.8 + 0.2;
                 ctx.beginPath();
                 ctx.arc(x, y, r, 0, Math.PI * 2);
                 ctx.fill();
             }
+            ctx.globalAlpha = 1.0;
         }
         drawStars();
 
-        let lastImageIndex = -1;
         let activeImages = [];
+        let imageQueue = [];
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
 
         function getRandomImage() {
+            if (imagePaths.length === 0) return '';
             if (imagePaths.length === 1) return imagePaths[0];
-            let idx;
-            do { idx = Math.floor(Math.random() * imagePaths.length); } while (idx === lastImageIndex);
-            lastImageIndex = idx;
-            return imagePaths[idx];
+
+            // If queue is empty, refill it with a shuffled copy of all images
+            if (imageQueue.length === 0) {
+                let newBatch = [...imagePaths];
+                shuffleArray(newBatch);
+
+                // Prevent the first image of new batch being the same as the last used image
+                // (This handles the 'reshuffle' boundary case)
+                if (window.lastUsedImage && newBatch[0] === window.lastUsedImage) {
+                    // Swap first element with last element
+                    [newBatch[0], newBatch[newBatch.length - 1]] = [newBatch[newBatch.length - 1], newBatch[0]];
+                }
+
+                imageQueue = newBatch;
+            }
+
+            const image = imageQueue.shift(); // Take from the front
+            window.lastUsedImage = image;
+            return image;
         }
 
         function spawnImage() {
@@ -200,115 +202,133 @@
             img.src = src;
             img.className = 'falling-img';
 
-            const size = Math.random() * 120 + 100; // 100-220px (larger)
+            const size = Math.random() * 80 + 80; // 80-160px
             img.style.width = size + 'px';
-            img.style.height = 'auto';
-            img.style.filter = 'saturate(1) grayscale(0%)';
-            img.baseSize = size;
+            img.style.height = 'auto'; // Maintain aspect ratio initially
 
-            // spawn closer to black hole, within 600px radius
+            // Spawn at random edge of screen or further out
+            const spawnRadius = Math.max(window.innerWidth, window.innerHeight) * 0.6;
             const angle = Math.random() * Math.PI * 2;
-            const distance = Math.random() * 600 + 300; // 300-900px from center
-            const x = centerX + Math.cos(angle) * distance;
-            const y = centerY + Math.sin(angle) * distance;
+
+            const x = centerX + Math.cos(angle) * spawnRadius;
+            const y = centerY + Math.sin(angle) * spawnRadius;
 
             img.style.left = x + 'px';
             img.style.top = y + 'px';
-            img.startX = x;
-            img.startY = y;
+
+            // Physics state
+            img.posX = x;
+            img.posY = y;
+
+            // Initial velocity: mostly towards center but with some tangential component (orbit)
+            const velocityMag = Math.random() * 2 + 1;
+            const angleToCenter = Math.atan2(centerY - y, centerX - x);
+            // Add a small spiral offset (tangential velocity) so it swirls
+            const spiralOffset = (Math.random() - 0.5) * 0.5;
+
+            img.vx = Math.cos(angleToCenter + spiralOffset) * velocityMag;
+            img.vy = Math.sin(angleToCenter + spiralOffset) * velocityMag;
+
+            img.baseSize = size;
             img.spawnTime = Date.now();
-            img.duration = Math.random() * 2000 + 2000; // 2-4s
 
             document.body.appendChild(img);
             activeImages.push(img);
         }
 
         function animate() {
-            const now = Date.now();
-
             activeImages = activeImages.filter(img => {
                 if (!img.parentElement) return false;
 
-                const elapsed = now - img.spawnTime;
-                const progress = Math.min(elapsed / img.duration, 1);
-
-                // Calculate direction toward black hole
-                let x = img.startX;
-                let y = img.startY;
-                const dx = centerX - x;
-                const dy = centerY - y;
+                // Calculate distance to center
+                const dx = centerX - img.posX;
+                const dy = centerY - img.posY;
                 const dist = Math.sqrt(dx * dx + dy * dy);
+                const angleToCenter = Math.atan2(dy, dx);
 
-                // Move toward black hole with accelerating speed (more realistic)
-                const speed = 3 + progress * 6; // accelerates from 3 to 9
-                const moveX = (dx / dist) * speed;
-                const moveY = (dy / dist) * speed;
+                // GRAVITY: Inverse square law-ish acceleration
+                // Closer = much faster
+                let gForce = 500 / (dist * dist + 100);
+                gForce = Math.min(gForce, 2); // Cap acceleration
 
-                x += moveX;
-                y += moveY;
+                img.vx += Math.cos(angleToCenter) * gForce;
+                img.vy += Math.sin(angleToCenter) * gForce;
 
-                // Distance from black hole center
-                const distFromBH = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
-
-                // Spaghettification effect: extreme stretching, rotation, blur, and distortion
-                let scale = 1;
-                let scaleY = 1;
-                let sizeMultiplier = 1;
-                let rotation = 0;
-                let blurAmount = 0;
-                let brightness = 1;
-                let pixelate = 0;
-
-                if (distFromBH < spaghettificationZone && distFromBH > blackholeRadius) {
-                    const squishFactor = 1 - (spaghettificationZone - distFromBH) / spaghettificationZone;
-
-                    // Extreme horizontal stretch (up to 20x - more realistic tidal force)
-                    scale = 1 + squishFactor * 20;
-
-                    // Extreme vertical compression (down to 0.05 - stronger crushing)
-                    scaleY = Math.max(1 - squishFactor * 0.95, 0.05);
-
-                    // Size shrinking as approach
-                    sizeMultiplier = Math.max(1 - squishFactor * 0.6, 0.3);
-
-                    // Add rotation that increases near event horizon (faster spin)
-                    rotation = squishFactor * 90;
-
-                    // Blur increases dramatically near black hole
-                    blurAmount = squishFactor * 30;
-
-                    // Darken and desaturate more aggressively
-                    brightness = Math.max(1 - squishFactor * 0.8, 0.15);
-
-                    // Pixelation effect near event horizon (visual breakdown)
-                    pixelate = Math.floor(squishFactor * 12);
-
-                    // Spawn debris pieces when spaghettified
-                    if (Math.random() < squishFactor * 0.15) {
-                        spawnDebris(x, y, squishFactor);
-                    }
+                // Friction / Drag (simulating accretion disk drag) if very close
+                if (dist < accretionDiskRadius * 2) {
+                    img.vx *= 0.98;
+                    img.vy *= 0.98;
                 }
 
-                // Apply size change
-                img.style.width = (img.baseSize * sizeMultiplier) + 'px';
+                // Update position
+                img.posX += img.vx;
+                img.posY += img.vy;
 
-                // Grayscale and saturation based on distance to black hole
-                let grayscale = 0;
-                let saturate = 1;
-                if (distFromBH < spaghettificationZone) {
-                    const colorLoss = 1 - (distFromBH / spaghettificationZone);
-                    grayscale = Math.min(colorLoss * 100, 100);
-                    saturate = Math.max(1 - colorLoss, 0);
+                // SPAGHETTIFICATION (Restored Tidal Forces)
+                // 1. Rotate image to align with radial line to center
+                // 2. Stretch along X (radial) axis based on proximity
+                // 3. Compress along Y (tangential) axis
+
+                let stretch = 1;
+                let compress = 1;
+                let opacity = 1;
+                let redshift = 0; // sepia/saturate shift
+
+                if (dist < gravityWell) {
+                    // Factor 0 to 1 as it gets closer
+                    const gravityFactor = Math.max(0, (gravityWell - dist) / gravityWell);
+
+                    // Exponential stretching near event horizon
+                    // At dist=80 (near horizon), we want huge stretch
+                    stretch = 1 + (Math.pow(gravityFactor, 3) * 15); // stretch up to 16x
+
+                    // Compression (volume preservation would implication x*y=1, so y = 1/x)
+                    // But physically, tidal forces compress inwards
+                    compress = Math.max(0.02, 1 / (stretch * 0.5));
+
+                    // Redshift effect: darken and shift color
+                    opacity = Math.min(1, dist / (eventHorizonRadius * 1.5));
                 }
 
-                img.style.left = x + 'px';
-                img.style.top = y + 'px';
-                img.style.transform = `translate(-50%, -50%) scale(${scale}, ${scaleY}) rotate(${rotation}deg)`;
-                img.style.filter = `saturate(${saturate}) grayscale(${grayscale}%) blur(${blurAmount}px) brightness(${brightness}) contrast(${1 + pixelate * 0.1})`;
-                img.style.opacity = Math.max(1 - progress * 0.5, 0.1);
+                // Visual transform
+                // Important: Transform order. 
+                // 1. Translate to position
+                // 2. Rotate to face center
+                // 3. Scale
 
-                // Remove if past event horizon or fully faded
-                if (distFromBH < blackholeRadius || progress >= 1) {
+                // The angle we want: The image "top" or "right" should point to center.
+                // Using scale(x, y): x is horizontal stretch. So we want image X-axis to point to center.
+                // Angle is angleToCenter.
+                const rotationDeg = angleToCenter * (180 / Math.PI);
+
+                img.style.left = img.posX + 'px';
+                img.style.top = img.posY + 'px';
+
+                img.style.transform = `
+                    translate(-50%, -50%)
+                    rotate(${rotationDeg}deg)
+                    scale(${stretch}, ${compress})
+                `;
+
+                // "Redshift" and fading near horizon
+                // As it falls in, time dilation makes it fade/redshift
+                if (dist < accretionDiskRadius * 1.5) {
+                    img.style.filter = `sepia(0.5) hue-rotate(-50deg) brightness(${dist / 200}) blur(${stretch * 0.5}px)`;
+                } else {
+                    img.style.filter = 'none';
+                }
+
+                img.style.opacity = opacity;
+
+                // Cleanup
+                // If it hits the event horizon (or very close), remove it
+                if (dist < eventHorizonRadius) {
+                    img.remove();
+                    return false;
+                }
+
+                // If it flies off screen (unlikely with gravity but possible)
+                if (dist > Math.max(window.innerWidth, window.innerHeight) * 1.5 && gForce < 0.01) {
                     img.remove();
                     return false;
                 }
@@ -320,56 +340,7 @@
         }
         animate();
 
-        function spawnDebris(x, y, intensity) {
-            const debris = document.createElement('div');
-            debris.className = 'debris';
-            const size = Math.random() * 15 + 5;
-            debris.style.width = size + 'px';
-            debris.style.height = size + 'px';
-            debris.style.background = `hsl(${Math.random() * 40}, ${60 + intensity * 40}%, ${50 - intensity * 30}%)`;
-            debris.style.borderRadius = '50%';
-            debris.style.left = (x + (Math.random() - 0.5) * 60) + 'px';
-            debris.style.top = (y + (Math.random() - 0.5) * 60) + 'px';
-
-            document.body.appendChild(debris);
-
-            // Animate debris falling into black hole
-            const debrisStartTime = Date.now();
-            const debrisDuration = 1500 + Math.random() * 1000;
-
-            function animateDebris() {
-                const elapsed = Date.now() - debrisStartTime;
-                const progress = Math.min(elapsed / debrisDuration, 1);
-
-                const dbx = parseFloat(debris.style.left);
-                const dby = parseFloat(debris.style.top);
-                let dx = centerX - dbx;
-                let dy = centerY - dby;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-
-                if (dist > 5) {
-                    const moveX = (dx / dist) * 4;
-                    const moveY = (dy / dist) * 4;
-                    debris.style.left = (dbx + moveX) + 'px';
-                    debris.style.top = (dby + moveY) + 'px';
-                }
-
-                debris.style.opacity = 1 - progress;
-
-                if (progress < 1 && dist > blackholeRadius) {
-                    requestAnimationFrame(animateDebris);
-                } else {
-                    debris.remove();
-                }
-            }
-
-            animateDebris();
-        }
-
-        setInterval(spawnImage, 500);
-
-        // Spawn first image immediately
-        spawnImage();
+        setInterval(spawnImage, 800);
     </script>
 </body>
 
